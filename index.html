@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>PhysicsHub — 物理研究前沿</title>
+  <meta name="theme-color" content="#080A12">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- KaTeX -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <!-- Marked -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+
+  <!-- Prism -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+
+  <!-- App styles -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <!-- Background gradient mesh -->
+  <div class="bg-mesh" aria-hidden="true"></div>
+
+  <div id="app">
+    <!-- Navigation -->
+    <nav class="navbar" role="navigation">
+      <div class="navbar-inner">
+        <a class="navbar-brand" href="#/" aria-label="PhysicsHub 首页">
+          <svg class="brand-icon" width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+            <circle cx="14" cy="14" r="13" stroke="url(#brand-grad)" stroke-width="1.5" opacity="0.3"/>
+            <ellipse cx="14" cy="14" rx="7" ry="13" stroke="url(#brand-grad)" stroke-width="1.2" opacity="0.7" transform="rotate(30 14 14)"/>
+            <ellipse cx="14" cy="14" rx="7" ry="13" stroke="url(#brand-grad)" stroke-width="1.2" opacity="0.7" transform="rotate(-30 14 14)"/>
+            <circle cx="14" cy="14" r="2" fill="#00D4AA"/>
+            <defs>
+              <linearGradient id="brand-grad" x1="0" y1="0" x2="28" y2="28">
+                <stop stop-color="#00D4AA"/>
+                <stop offset="1" stop-color="#6366F1"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <span>PhysicsHub</span>
+        </a>
+
+        <div class="navbar-search" id="navbar-search">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M11 11L14.5 14.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <input type="text" id="search-input" placeholder="搜索文章、标签..." aria-label="搜索文章">
+          <button class="search-clear" id="search-clear" aria-label="清除搜索">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="navbar-actions">
+          <a href="/admin/login.html" class="btn btn-ghost btn-nav">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <circle cx="7" cy="4" r="2.5" stroke="currentColor" stroke-width="1.3"/>
+              <path d="M1 13C1 10.5 3 8.5 7 8.5S13 10.5 13 13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+            <span class="nav-label">管理</span>
+          </a>
+          <button class="btn-icon mobile-search-toggle" id="mobile-search-toggle" aria-label="打开搜索">
+            <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+              <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M11 11L14.5 14.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Mobile search overlay -->
+    <div class="search-overlay" id="search-overlay">
+      <div class="search-overlay-inner">
+        <div class="search-overlay-header">
+          <span class="search-overlay-title">搜索文章</span>
+          <button class="btn-icon" id="search-overlay-close" aria-label="关闭搜索">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <input type="text" id="search-input-mobile" placeholder="输入关键词搜索..." autofocus>
+      </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-glow" aria-hidden="true"></div>
+      <div class="hero-content">
+<h1><span class="gradient-text">物理研究前沿</span></h1>
+        <div class="hero-tags" id="category-tags" role="tablist" aria-label="文章分类筛选"></div>
+      </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg class="section-title-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <circle cx="10" cy="10" r="3" fill="#00D4AA"/>
+            <circle cx="10" cy="10" r="7" stroke="#00D4AA" stroke-width="1.5" opacity="0.4"/>
+          </svg>
+          研究动态
+          <span class="article-count" id="article-count"></span>
+        </h2>
+      </div>
+      <div class="timeline" id="article-list"></div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <svg width="20" height="20" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+            <circle cx="14" cy="14" r="13" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+            <ellipse cx="14" cy="14" rx="7" ry="13" stroke="currentColor" stroke-width="1.2" opacity="0.5" transform="rotate(30 14 14)"/>
+            <ellipse cx="14" cy="14" rx="7" ry="13" stroke="currentColor" stroke-width="1.2" opacity="0.5" transform="rotate(-30 14 14)"/>
+            <circle cx="14" cy="14" r="2" fill="currentColor"/>
+          </svg>
+          PhysicsHub
+        </div>
+        <p>&copy; 2026 — 物理研究前沿 · 基于 Markdown 构建</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+  <script>
+    window.addEventListener('popstate', (e) => {
+      if (e.state && e.state.page === 'article') {
+        App.showArticle(e.state.slug);
+      } else {
+        App.showPage('home');
+      }
+    });
+  </script>
+</body>
+</html>

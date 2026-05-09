@@ -1,0 +1,11 @@
+{
+  "admin": {
+    "username": "admin",
+    "password_hash": "c2cd5d509853c6277384b76794f749724ddba9b692862dd59708ea80b8477c7a"
+  },
+  "site": {
+    "name": "PhysicsHub",
+    "subtitle": "物理研究前沿",
+    "description": "核物理·核天体物理·超核物理 研究动态"
+  }
+}

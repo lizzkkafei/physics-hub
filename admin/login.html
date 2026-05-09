@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理员登录 — PhysicsHub</title>
+  <meta name="theme-color" content="#080A12">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="bg-mesh" aria-hidden="true"></div>
+  <div class="login-page">
+    <div class="login-card">
+      <h2>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="5" y="11" width="14" height="10" rx="2"/>
+          <path d="M8 11V7a4 4 0 018 0v4"/>
+          <circle cx="12" cy="16" r="1.5"/>
+        </svg>
+        管理员登录
+      </h2>
+      <p>登录后可上传和管理研究文章</p>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">用户名</label>
+          <input type="text" name="username" id="username" placeholder="请输入用户名" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="password">密码</label>
+          <input type="password" name="password" id="password" placeholder="请输入密码" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary">登录</button>
+        <div class="login-error" id="login-error"></div>
+      </form>
+      <a href="/" class="login-back-link">← 返回首页</a>
+    </div>
+  </div>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
