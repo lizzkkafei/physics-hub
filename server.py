@@ -17,6 +17,15 @@ import jwt
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 CORS(app)
 
+# Prevent caching of static files so updates reflect immediately
+@app.after_request
+def add_no_cache(response):
+    if response.content_type and 'text/html' in response.content_type:
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    elif response.content_type and ('javascript' in response.content_type or 'css' in response.content_type):
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    return response
+
 # Configuration
 SECRET_KEY = os.environ.get('PH_SECRET_KEY', 'physics-hub-secret-key-change-in-production')
 ARTICLES_DIR = os.path.join(os.path.dirname(__file__), 'static', 'articles')
