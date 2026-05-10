@@ -817,21 +817,29 @@ const App = {
         <div style="max-width: 500px;">
           <div class="form-group">
             <label>站点名称</label>
-            <input type="text" value="PhysicsHub" placeholder="站点名称">
+            <input type="text" id="settings-site-name" value="PhysicsHub" placeholder="站点名称">
           </div>
           <div class="form-group">
             <label>站点副标题</label>
-            <input type="text" value="物理研究前沿" placeholder="站点副标题">
+            <input type="text" id="settings-subtitle" value="物理研究前沿" placeholder="站点副标题">
           </div>
           <div class="form-group">
             <label>管理员用户名</label>
-            <input type="text" value="admin" placeholder="用户名">
+            <input type="text" id="settings-username" value="admin" placeholder="用户名" disabled style="opacity:0.5">
+          </div>
+          <hr style="border:none;border-top:1px solid var(--border);margin:24px 0;">
+          <div class="form-group">
+            <label>旧密码</label>
+            <input type="password" id="settings-old-password" placeholder="输入旧密码">
           </div>
           <div class="form-group">
             <label>新密码</label>
-            <input type="password" placeholder="留空则不修改">
+            <input type="password" id="settings-new-password" placeholder="留空则不修改">
           </div>
-          <button class="btn btn-primary">保存设置</button>
+          <div style="display:flex;gap:12px;align-items:center;">
+            <button class="btn btn-primary" onclick="App.saveSettings()">保存设置</button>
+            <span id="settings-status" style="font-size:13px;color:var(--text-dim);"></span>
+          </div>
         </div>`;
     }
   },
@@ -1033,6 +1041,53 @@ const App = {
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
+  },
+
+  async saveSettings() {
+    const oldPassword = document.getElementById('settings-old-password')?.value;
+    const newPassword = document.getElementById('settings-new-password')?.value;
+    const statusEl = document.getElementById('settings-status');
+    if (!statusEl) return;
+
+    if (!oldPassword && !newPassword) {
+      this.showToast('没有需要保存的修改', 'error');
+      return;
+    }
+
+    if (newPassword && !oldPassword) {
+      this.showToast('修改密码需要输入旧密码', 'error');
+      return;
+    }
+
+    statusEl.textContent = '保存中...';
+
+    try {
+      const res = await fetch(`${this.API}/api/admin/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.authToken}`
+        },
+        body: JSON.stringify({
+          old_password: oldPassword,
+          new_password: newPassword
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        this.showToast('密码已修改', 'success');
+        statusEl.textContent = '✓ 已保存';
+        document.getElementById('settings-old-password').value = '';
+        document.getElementById('settings-new-password').value = '';
+      } else {
+        this.showToast(data.error || '保存失败', 'error');
+        statusEl.textContent = '保存失败';
+      }
+    } catch {
+      this.showToast('无法连接服务器', 'error');
+      statusEl.textContent = '';
+    }
   },
 
   logout() {
