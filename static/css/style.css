@@ -1159,6 +1159,7 @@ a:hover {
   margin-bottom: 20px;
 }
 
+#upload-content,
 #edit-content {
   width: 100%;
   min-height: 420px;
@@ -1174,6 +1175,7 @@ a:hover {
   outline: none;
   transition: border-color 0.2s;
 }
+#upload-content:focus,
 #edit-content:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px var(--primary-dim);

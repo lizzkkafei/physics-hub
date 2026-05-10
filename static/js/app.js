@@ -525,30 +525,137 @@ const App = {
       return;
     }
 
-    const categoryInput = document.getElementById('upload-category');
-    const tagsInput = document.getElementById('upload-tags');
-    const titleInput = document.getElementById('upload-title');
-    const userCategory = categoryInput ? categoryInput.value.trim() : '';
-    const userTags = tagsInput ? tagsInput.value.split(',').map(t => t.trim()).filter(t => t) : [];
-    const userTitle = titleInput ? titleInput.value.trim() : '';
-
+    // Read file
     const readFile = () => new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => resolve(e.target.result);
       reader.onerror = reject;
       reader.readAsText(file);
     });
+    const rawContent = await readFile();
 
-    let content = await readFile();
+    // Parse metadata from content/filename
+    const parsed = this.parseMarkdown(rawContent, file.name);
 
-    if (userCategory || userTags.length || userTitle) {
-      content = this.injectFrontMatter(content, { title: userTitle, category: userCategory, tags: userTags });
+    // Store for later upload
+    this.uploadFileData = {
+      fileName: file.name,
+      rawContent,
+      title: parsed.title,
+      category: parsed.category,
+      tags: parsed.tags,
+      description: parsed.description
+    };
+
+    this.showUploadPreview();
+  },
+
+  showUploadPreview() {
+    const content = document.getElementById('admin-content');
+    if (!content || !this.uploadFileData) return;
+
+    const d = this.uploadFileData;
+    const tagsStr = d.tags ? d.tags.join(', ') : '';
+    const catOptions = this.categories.filter(c => c !== 'all').map(c => `<option value="${c}">`).join('');
+
+    content.innerHTML = `
+      <div style="max-width:1000px">
+        <div class="admin-header">
+          <h2>上传文章</h2>
+          <span style="font-size:13px;color:var(--text-muted);background:var(--card);padding:4px 12px;border-radius:999px;border:1px solid var(--border);">${d.fileName}</span>
+        </div>
+
+        <div class="edit-meta">
+          <div class="form-group">
+            <label>文章标题</label>
+            <input type="text" id="upload-title" value="${this.escapeHtml(d.title)}" placeholder="文章标题">
+          </div>
+          <div class="form-group">
+            <label>文章类别</label>
+            <input type="text" id="upload-category" value="${this.escapeHtml(d.category)}" list="upload-cat-suggestions">
+            <datalist id="upload-cat-suggestions">${catOptions}</datalist>
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label>标签（逗号分隔）</label>
+            <input type="text" id="upload-tags" value="${this.escapeHtml(tagsStr)}" placeholder="如：rp-process, 质量测量, HIAF">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Markdown 内容 <span style="font-weight:400;color:var(--text-dim);font-size:12px;">（可编辑）</span></label>
+          <textarea id="upload-content" spellcheck="false">${this.escapeHtml(d.rawContent)}</textarea>
+        </div>
+
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:24px;">
+          <button class="btn btn-primary" onclick="App.confirmUpload()">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px">
+              <path d="M2 7l3.5 3.5L12 3"/>
+            </svg>
+            确认上传
+          </button>
+          <button class="btn btn-ghost" id="upload-preview-toggle" onclick="App.toggleUploadPreview()">预览</button>
+          <button class="btn btn-ghost" onclick="App.showAdminTab('upload')">取消</button>
+          <span id="upload-status" style="font-size:13px;color:var(--text-dim);"></span>
+        </div>
+
+        <div id="upload-preview" class="md-content" style="display:none;padding:24px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);margin-top:8px;"></div>
+      </div>`;
+  },
+
+  toggleUploadPreview() {
+    const preview = document.getElementById('upload-preview');
+    const btn = document.getElementById('upload-preview-toggle');
+    if (!preview) return;
+
+    if (preview.style.display === 'none' || !preview.style.display) {
+      const textarea = document.getElementById('upload-content');
+      const raw = textarea ? textarea.value : '';
+      let html = '';
+      if (typeof marked !== 'undefined') {
+        html = marked.parse(raw);
+      } else {
+        html = raw.replace(/\n/g, '<br>');
+      }
+      preview.innerHTML = html;
+      preview.style.display = 'block';
+      if (btn) btn.textContent = '收起预览';
+      if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(preview, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '$', right: '$', display: false }
+          ]
+        });
+      }
+    } else {
+      preview.style.display = 'none';
+      if (btn) btn.textContent = '预览';
+    }
+  },
+
+  async confirmUpload() {
+    const title = document.getElementById('upload-title')?.value.trim();
+    const category = document.getElementById('upload-category')?.value.trim();
+    const tagsStr = document.getElementById('upload-tags')?.value.trim();
+    const content = document.getElementById('upload-content')?.value;
+
+    if (!title || !content) {
+      this.showToast('标题和内容不能为空', 'error');
+      return;
     }
 
-    const modifiedFile = new File([content], file.name, { type: 'text/markdown' });
+    const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(t => t) : [];
+    const fileName = this.uploadFileData?.fileName || 'article.md';
+
+    // Inject front matter into content for upload
+    const finalContent = this.injectFrontMatter(content, { title, category, tags });
+    const modifiedFile = new File([finalContent], fileName, { type: 'text/markdown' });
 
     const formData = new FormData();
     formData.append('file', modifiedFile);
+
+    const statusEl = document.getElementById('upload-status');
+    if (statusEl) statusEl.textContent = '上传中...';
 
     try {
       const res = await fetch(`${this.API}/api/admin/upload`, {
@@ -559,21 +666,30 @@ const App = {
 
       if (res.ok) {
         this.showToast('文章上传成功！', 'success');
-        if (categoryInput) categoryInput.value = '';
-        if (tagsInput) tagsInput.value = '';
-        if (titleInput) titleInput.value = '';
+        this.uploadFileData = null;
         this.loadArticles();
       } else {
-        this.showToast('上传失败，请重试', 'error');
+        const err = await res.json().catch(() => ({}));
+        this.showToast(err.error || '上传失败，请重试', 'error');
+        if (statusEl) statusEl.textContent = '上传失败';
       }
     } catch {
-      const article = this.parseMarkdown(content, file.name);
-      if (userCategory) article.category = userCategory;
-      if (userTags.length) article.tags = userTags;
-      if (userTitle) article.title = userTitle;
+      // Fallback: add locally
+      const article = {
+        id: Date.now().toString(),
+        slug: title.toLowerCase().replace(/[^a-z0-9一-鿿]+/g, '-').replace(/^-|-$/g, '') || 'article-' + Date.now(),
+        title,
+        date: new Date().toISOString().split('T')[0],
+        category: category || '未分类',
+        tags,
+        description: content.replace(/[#*_`\[\]()!]/g, '').trim().substring(0, 200) + '...',
+        content,
+        published: true
+      };
       this.articles.unshift(article);
+      this.uploadFileData = null;
       this.showToast('文章上传成功！（本地预览模式）', 'success');
-      this.renderAdminDashboard();
+      this.showAdminTab('articles');
     }
   },
 
@@ -773,30 +889,6 @@ const App = {
         <div class="admin-header">
           <h2>上传文章</h2>
         </div>
-        <div style="max-width: 600px; margin-bottom: 24px;">
-          <div class="form-group">
-            <label>文章标题</label>
-            <input type="text" id="upload-title" placeholder="留空则从文件名自动提取">
-          </div>
-          <div class="form-group">
-            <label>文章类别 / 学科</label>
-            <input type="text" id="upload-category" placeholder="如：核天体物理、核结构、超核物理、核反应" list="category-suggestions">
-            <datalist id="category-suggestions">
-              ${this.categories.filter(c => c !== 'all').map(c => `<option value="${c}">`).join('')}
-              <option value="核天体物理">
-              <option value="核结构">
-              <option value="超核物理">
-              <option value="核反应">
-              <option value="核谱学">
-              <option value="波谱学">
-              <option value="核合成">
-            </datalist>
-          </div>
-          <div class="form-group">
-            <label>标签（逗号分隔）</label>
-            <input type="text" id="upload-tags" placeholder="如：rp-process, 质量测量, HIAF">
-          </div>
-        </div>
         <div class="upload-zone" id="upload-zone">
           <div class="upload-icon">
             <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.5">
@@ -805,8 +897,8 @@ const App = {
           </div>
           <h3>拖拽 Markdown 文件到此处</h3>
           <p>或点击选择文件上传</p>
-          <div class="upload-hint">支持 .md 格式，最大 5MB，支持 YAML front matter</div>
-          <div class="upload-hint" style="margin-top:8px; background: var(--primary-dim); color: var(--primary);">填写上方字段可覆盖文件中的 front matter 设置</div>
+          <div class="upload-hint">支持 .md 格式，最大 5MB</div>
+          <div class="upload-hint" style="margin-top:8px; background: var(--primary-dim); color: var(--primary);">选择文件后可预览和编辑内容，确认后才上传</div>
         </div>
         <input type="file" id="file-input" accept=".md" style="display:none">`;
     } else if (tab === 'settings') {
