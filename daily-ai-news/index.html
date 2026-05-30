@@ -85,6 +85,15 @@
     }
     .news-item:hover .arrow-icon { color: #667eea; transform: translateX(4px); }
 
+    .back-link {
+      display: inline-flex; align-items: center; gap: 4px;
+      color: #667eea; text-decoration: none; font-size: 0.9rem; font-weight: 500;
+      padding: 7px 16px; border-radius: 10px;
+      background: rgba(255,255,255,0.5);
+      transition: all 0.2s; margin-bottom: 16px;
+    }
+    .back-link:hover { background: rgba(255,255,255,0.8); transform: translateX(-3px); }
+
     .footer {
       text-align: center; padding: 28px 16px 10px; font-size: 0.82rem; color: #999;
     }
@@ -100,6 +109,8 @@
 </head>
 <body>
 <div class="container">
+
+  <a class="back-link" href="/">← 返回主站</a>
 
   <header class="header">
     <h1>🔥 每日 AI 资讯 TOP10</h1>
