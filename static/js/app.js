@@ -1,4 +1,4 @@
-// PhysicsHub — Frontend Application
+// Knowledge Hub — Frontend Application
 
 const App = {
   // State
@@ -795,7 +795,7 @@ const App = {
                 </linearGradient>
               </defs>
             </svg>
-            PhysicsHub
+            Knowledge Hub
           </a>
           <div class="navbar-actions">
             <a href="/" class="btn btn-ghost btn-nav">
@@ -909,7 +909,7 @@ const App = {
         <div style="max-width: 500px;">
           <div class="form-group">
             <label>站点名称</label>
-            <input type="text" id="settings-site-name" value="PhysicsHub" placeholder="站点名称">
+            <input type="text" id="settings-site-name" value="Knowledge Hub" placeholder="站点名称">
           </div>
           <div class="form-group">
             <label>站点副标题</label>

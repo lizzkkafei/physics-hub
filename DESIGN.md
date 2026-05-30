@@ -1,8 +1,8 @@
-# PhysicsHub — 物理学研究平台 设计文案
+# Knowledge Hub — 物理学研究平台 设计文案
 
 ## 一、项目概述
 
-**项目名称**：PhysicsHub（物理研究前沿）
+**项目名称**：Knowledge Hub（物理研究前沿）
 
 **项目定位**：面向核物理、核天体物理、超核物理等领域研究者的学术内容发布与阅读平台。以 Markdown 为核心内容载体，支持管理员快速上传文章，前端按时间线展示研究动态。
 
@@ -75,7 +75,7 @@
 ## 四、页面结构
 
 ```
-PhysicsHub/
+Knowledge Hub/
 ├── 首页 (/)
 │   ├── 顶部导航栏
 │   ├── 英雄区域 (Hero) — 站点标语 + 背景
@@ -242,7 +242,7 @@ $$E = mc^2$$
     "password_hash": "bcrypt_hash..."
   },
   "site": {
-    "name": "PhysicsHub",
+    "name": "Knowledge Hub",
     "subtitle": "物理研究前沿",
     "description": "核物理·核天体物理·超核物理 研究动态"
   }

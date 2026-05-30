@@ -1,5 +1,5 @@
 """
-PhysicsHub — Backend Server
+Knowledge Hub — Backend Server
 Flask-based API server for article management
 """
 
@@ -27,7 +27,7 @@ def add_no_cache(response):
     return response
 
 # Configuration
-SECRET_KEY = os.environ.get('PH_SECRET_KEY', 'physics-hub-secret-key-change-in-production')
+SECRET_KEY = os.environ.get('KH_SECRET_KEY', 'knowledge-hub-secret-key-change-in-production')
 ARTICLES_DIR = os.path.join(os.path.dirname(__file__), 'static', 'articles')
 INDEX_FILE = os.path.join(os.path.dirname(__file__), 'articles_index.json')
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'config.json')
@@ -49,7 +49,7 @@ def load_config():
             'password_hash': hashlib.sha256('physics2026'.encode()).hexdigest()
         },
         'site': {
-            'name': 'PhysicsHub',
+            'name': 'Knowledge Hub',
             'subtitle': '物理研究前沿',
             'description': '核物理·核天体物理·超核物理 研究动态'
         }
@@ -423,7 +423,7 @@ if __name__ == '__main__':
     load_index()
 
     print('\n' + '=' * 50)
-    print('  PhysicsHub Server Starting...')
+    print('  Knowledge Hub Server Starting...')
     print('=' * 50)
     port = int(os.environ.get('PORT', 8080))
     debug = os.environ.get('FLASK_DEBUG', '0') == '1'
