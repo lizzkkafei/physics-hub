@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>#9 LangChain SmithDB 与 LangSmith Engine：Agent 可观测性革命 — 每日 AI 资讯</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                   "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      color: #1a1a2e;
+      padding: 24px 16px;
+    }
+    .container { max-width: 780px; margin: 0 auto; }
+
+    /* 导航栏 */
+    .nav-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px; flex-wrap: wrap; gap: 8px;
+    }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 4px;
+      color: #667eea; text-decoration: none; font-size: 0.9rem; font-weight: 500;
+      padding: 7px 16px; border-radius: 10px;
+      background: rgba(255,255,255,0.5);
+      transition: all 0.2s;
+    }
+    .back-link:hover { background: rgba(255,255,255,0.8); transform: translateX(-3px); }
+    .rank-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 34px; height: 34px; border-radius: 10px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff; font-weight: 700; font-size: 0.85rem;
+    }
+
+    /* 语音控件 */
+    .voice-bar {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      padding: 16px 22px;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 14px; margin-bottom: 22px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    .voice-bar .label { font-size: 0.85rem; color: #666; font-weight: 500; }
+    .voice-btn {
+      padding: 8px 18px; border: none; border-radius: 10px;
+      font-size: 0.85rem; font-weight: 500; cursor: pointer;
+      transition: all 0.2s; background: #eef0f7; color: #333;
+    }
+    .voice-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .voice-btn:active { transform: scale(0.96); }
+    .voice-btn.primary {
+      background: linear-gradient(135deg, #667eea, #764ba2); color: #fff;
+    }
+    .voice-btn.primary:hover { box-shadow: 0 4px 16px rgba(102,126,234,0.4); }
+    .voice-btn.danger { background: #ff6b6b; color: #fff; }
+    .voice-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+    .voice-status {
+      font-size: 0.8rem; color: #888; text-align: center; padding: 4px 0 0;
+    }
+    .progress-wrap {
+      width: 100%; height: 4px; background: #e0e0e0;
+      border-radius: 2px; overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      border-radius: 2px; transition: width 0.3s linear;
+    }
+
+    /* 文章正文 */
+    .article {
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(8px);
+      border-radius: 20px; padding: 36px 40px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+    }
+    .article h1 {
+      font-size: 1.6rem; line-height: 1.4; color: #1a1a2e;
+      margin-bottom: 8px;
+    }
+    .article .meta {
+      font-size: 0.82rem; color: #999; margin-bottom: 24px;
+      padding-bottom: 16px; border-bottom: 1px solid #e8e8e8;
+    }
+    .article p {
+      font-size: 1rem; color: #333; line-height: 2;
+      margin-bottom: 18px;
+      text-indent: 2em;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 12px 10px; }
+      .article { padding: 18px 16px; }
+      .article h1 { font-size: 1.2rem; }
+      .article p { font-size: 0.93rem; text-indent: 1.5em; }
+      .voice-bar { flex-direction: column; gap: 6px; }
+      .voice-btn { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- 导航栏 -->
+  <div class="nav-bar">
+    <a class="back-link" href="index.html">← 返回全部资讯</a>
+    <span class="rank-badge">#9</span>
+  </div>
+
+  <!-- 语音控件 -->
+  <div class="voice-bar">
+    <span class="label">🔊 语音</span>
+    <button class="voice-btn primary" id="playBtn">▶ 朗读本文</button>
+    <button class="voice-btn" id="pauseBtn">⏸ 暂停</button>
+    <button class="voice-btn danger" id="stopBtn">⏹ 停止</button>
+    <div class="progress-wrap">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+  </div>
+  <div class="voice-status" id="voiceStatus">点击「朗读本文」收听全文</div>
+
+  <!-- 正文 -->
+  <div class="article">
+    <h1>LangChain SmithDB 与 LangSmith Engine：Agent 可观测性革命</h1>
+    <div class="meta">2026-05-30</div>
+      <p>LangChain 在 Agent 基础设施赛道上连续发布了两款重磅产品——SmithDB 和 LangSmith Engine，进一步完善了从 Agent 开发调试到生产运维的全链路工具生态。</p>
+      <p>SmithDB 是一款为 AI Agent 追踪和可观测性场景深度定制的高性能数据库。传统的日志系统（如 Elasticsearch）和通用时序数据库在处理 Agent 工作流产生的大量结构化事件数据时，往往面临写入吞吐低、查询延迟高的问题。SmithDB 从底层架构上针对 Agent 数据模型进行了优化——它的数据模式设计天然适配 Agent 的调用链、状态转换和决策轨迹，查询速度比通用方案快 12 到 15 倍。对于需要实时监控数百个并行 Agent 运行状态的团队来说，这一性能优势意味着可以更快速地定位异常、分析根因。</p>
+      <p>LangSmith Engine 则更进一步，将 AI Agent 的可观测性从「被动记录」提升到了「主动修复」的层次。它建立了一个完整的「感知-分析-修复」闭环：当 Agent 在执行过程中出现异常（如工具调用失败、输出格式不符合预期、任务超时等），Engine 会自动分析错误的根本原因，生成用户可审核的修复方案，并在批准后自动重新执行。这意味着开发者和运维人员不再需要手动排查每一个失败的 Agent 调用——系统的自我修复能力大幅降低了人工干预的需求。</p>
+      <p>结合此前发布的 Deep Agents v0.6（引入了 Delta Channels 和 Context Hub 两项创新功能），LangChain 正在从单纯的开发框架提供商转型为全面的 Agent 基础设施平台。Delta Channels 允许 Agent 之间通过增量变化进行高效通信，大幅减少多 Agent 协作中的冗余数据传输；Context Hub 则为长时运行的 Agent 提供了统一的上下文管理能力，确保在跨会话场景中的状态一致性。</p>
+      <p>这三款产品的组合效果是显著的：对于运行大规模 Agent 集群的团队，SmithDB 解决了数据存储和查询的瓶颈，LangSmith Engine 降低了运维人力成本，而 Deep Agents v0.6 提升了多 Agent 协作的效率和可靠性。LangChain 正在将这些工具整合为统一的 Agent 运维平台，意图在快速增长的 Agent 基础设施市场中占据核心生态位。</p>
+  </div>
+
+</div>
+
+<script>
+(function() {
+  var audio = new Audio();
+  audio.src = 'voices/voice_09.mp3';
+  audio.preload = 'auto';
+
+  var $ = function(id) { return document.getElementById(id); };
+  var playBtn = $('playBtn'), pauseBtn = $('pauseBtn'), stopBtn = $('stopBtn');
+  var status = $('voiceStatus'), progressBar = $('progressBar');
+  var timer = null;
+
+  function setProgress() {
+    if (audio.duration && !isNaN(audio.duration))
+      progressBar.style.width = Math.min((audio.currentTime / audio.duration) * 100, 100) + '%';
+  }
+  function startTimer() { clearTimer(); timer = setInterval(setProgress, 200); }
+  function clearTimer() { if (timer) { clearInterval(timer); timer = null; } }
+
+  audio.onplay = function() {
+    playBtn.textContent = '⏸ 播放中'; startTimer();
+    status.textContent = '🔊 正在朗读全文...';
+  };
+  audio.onpause = function() {
+    playBtn.textContent = '▶ 继续'; clearTimer();
+    status.textContent = '⏸ 已暂停';
+  };
+  audio.onended = function() {
+    playBtn.textContent = '▶ 重播'; clearTimer();
+    progressBar.style.width = '0%';
+    status.textContent = '✅ 播放完成';
+  };
+  audio.onerror = function() {
+    playBtn.textContent = '▶ 朗读本文'; status.textContent = '⚠️ 音频加载失败';
+    clearTimer(); progressBar.style.width = '0%';
+  };
+
+  playBtn.onclick = function() {
+    if (!audio.paused) { audio.pause(); return; }
+    if (audio.ended) audio.currentTime = 0;
+    audio.play().catch(function() { status.textContent = '⚠️ 请先点击页面激活音频'; });
+  };
+  pauseBtn.onclick = function() {
+    if (audio.paused) audio.play().catch(function(){}); else audio.pause();
+  };
+  stopBtn.onclick = function() {
+    audio.pause(); audio.currentTime = 0;
+    playBtn.textContent = '▶ 朗读本文'; status.textContent = '⏹ 已停止';
+    clearTimer(); progressBar.style.width = '0%';
+  };
+  document.addEventListener('keydown', function(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.code === 'Space') {
+      e.preventDefault();
+      if (audio.paused) audio.play().catch(function(){}); else audio.pause();
+    }
+  });
+})();
+</script>
+</body>
+</html>

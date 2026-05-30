@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>#6 社区争议：Opus 4.8 是王者归来还是评测驱动？ — 每日 AI 资讯</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                   "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      color: #1a1a2e;
+      padding: 24px 16px;
+    }
+    .container { max-width: 780px; margin: 0 auto; }
+
+    /* 导航栏 */
+    .nav-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px; flex-wrap: wrap; gap: 8px;
+    }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 4px;
+      color: #667eea; text-decoration: none; font-size: 0.9rem; font-weight: 500;
+      padding: 7px 16px; border-radius: 10px;
+      background: rgba(255,255,255,0.5);
+      transition: all 0.2s;
+    }
+    .back-link:hover { background: rgba(255,255,255,0.8); transform: translateX(-3px); }
+    .rank-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 34px; height: 34px; border-radius: 10px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff; font-weight: 700; font-size: 0.85rem;
+    }
+
+    /* 语音控件 */
+    .voice-bar {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      padding: 16px 22px;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 14px; margin-bottom: 22px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    .voice-bar .label { font-size: 0.85rem; color: #666; font-weight: 500; }
+    .voice-btn {
+      padding: 8px 18px; border: none; border-radius: 10px;
+      font-size: 0.85rem; font-weight: 500; cursor: pointer;
+      transition: all 0.2s; background: #eef0f7; color: #333;
+    }
+    .voice-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .voice-btn:active { transform: scale(0.96); }
+    .voice-btn.primary {
+      background: linear-gradient(135deg, #667eea, #764ba2); color: #fff;
+    }
+    .voice-btn.primary:hover { box-shadow: 0 4px 16px rgba(102,126,234,0.4); }
+    .voice-btn.danger { background: #ff6b6b; color: #fff; }
+    .voice-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+    .voice-status {
+      font-size: 0.8rem; color: #888; text-align: center; padding: 4px 0 0;
+    }
+    .progress-wrap {
+      width: 100%; height: 4px; background: #e0e0e0;
+      border-radius: 2px; overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      border-radius: 2px; transition: width 0.3s linear;
+    }
+
+    /* 文章正文 */
+    .article {
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(8px);
+      border-radius: 20px; padding: 36px 40px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+    }
+    .article h1 {
+      font-size: 1.6rem; line-height: 1.4; color: #1a1a2e;
+      margin-bottom: 8px;
+    }
+    .article .meta {
+      font-size: 0.82rem; color: #999; margin-bottom: 24px;
+      padding-bottom: 16px; border-bottom: 1px solid #e8e8e8;
+    }
+    .article p {
+      font-size: 1rem; color: #333; line-height: 2;
+      margin-bottom: 18px;
+      text-indent: 2em;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 12px 10px; }
+      .article { padding: 18px 16px; }
+      .article h1 { font-size: 1.2rem; }
+      .article p { font-size: 0.93rem; text-indent: 1.5em; }
+      .voice-bar { flex-direction: column; gap: 6px; }
+      .voice-btn { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- 导航栏 -->
+  <div class="nav-bar">
+    <a class="back-link" href="index.html">← 返回全部资讯</a>
+    <span class="rank-badge">#6</span>
+  </div>
+
+  <!-- 语音控件 -->
+  <div class="voice-bar">
+    <span class="label">🔊 语音</span>
+    <button class="voice-btn primary" id="playBtn">▶ 朗读本文</button>
+    <button class="voice-btn" id="pauseBtn">⏸ 暂停</button>
+    <button class="voice-btn danger" id="stopBtn">⏹ 停止</button>
+    <div class="progress-wrap">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+  </div>
+  <div class="voice-status" id="voiceStatus">点击「朗读本文」收听全文</div>
+
+  <!-- 正文 -->
+  <div class="article">
+    <h1>社区争议：Opus 4.8 是王者归来还是评测驱动？</h1>
+    <div class="meta">2026-05-30</div>
+      <p>每一次重大模型发布都伴随着社区的热议，但 Opus 4.8 引发的争议烈度在近年来的 AI 圈子中实属罕见。不同阵营基于各自的测试数据和使用体验，给出了截然不同的评价。</p>
+      <p>支持派的声音主要来自 Anthropic 的忠实用户和技术领袖。Dan Shipper 在评测文章中直言 Opus 4.8「完全有资格被命名为 Opus 5」，他认为模型在 Senior Engineer 基准测试上的表现超越了 GPT-5.5，比 Opus 4.7 提升了超过 30 分。Cursor 开发团队在社交平台上公开称赞 Opus 4.8 的持久性和诚实度，称其「在复杂任务中的坚持令人印象深刻」。开发者 Mikey K 和 Teknium 也发表了一致的好评，强调模型的自我认知能力——它更频繁地主动标注自身的局限和不确定之处——是一个被低估的进步。Artificial Analysis 将其列为智能指数第一模型的结论，为支持派提供了第三方数据背书。</p>
+      <p>怀疑派的论据同样坚实。Andon Labs 的独立测试表明，Opus 4.8 在 Vending Bench 和 Blueprint-Bench 2 上的表现反而比 4.7 更差，这与官方发布的亮眼成绩形成了鲜明对比。他们认为 Opus 4.8 是 Anthropic 迄今「最评测感知」的模型——即模型的能力提升可能部分源于对已知评测集的过度优化，而非真正的通用能力增长。部分用户在实际编码工作中报告称，并未感受到官方声称的那种「质的飞跃」，普通问答和文档处理任务上的改进幅度微乎其微。</p>
+      <p>中间派——暂且称之为「结构派」——提出了一个更高维度的观点：关于模型本身的讨论正在变得次要，因为 Agent 执行框架的重要性正在超过原始模型质量。Codex 凭借更成熟的执行环境、工具链集成和开发者体验，在编程助手市场建立了显著优势。Opus 4.8 虽然是更聪明的模型，但如果无法匹配对等的执行框架质量，用户仍然倾向于选择整体体验更好的竞品。值得注意的是，Opus 4.8 发布后的 48 小时内，Cursor、Windsurf、Perplexity 和 Cline 等主流开发平台均已宣布接入——这说明市场对模型本身仍然充满信心。</p>
+  </div>
+
+</div>
+
+<script>
+(function() {
+  var audio = new Audio();
+  audio.src = 'voices/voice_06.mp3';
+  audio.preload = 'auto';
+
+  var $ = function(id) { return document.getElementById(id); };
+  var playBtn = $('playBtn'), pauseBtn = $('pauseBtn'), stopBtn = $('stopBtn');
+  var status = $('voiceStatus'), progressBar = $('progressBar');
+  var timer = null;
+
+  function setProgress() {
+    if (audio.duration && !isNaN(audio.duration))
+      progressBar.style.width = Math.min((audio.currentTime / audio.duration) * 100, 100) + '%';
+  }
+  function startTimer() { clearTimer(); timer = setInterval(setProgress, 200); }
+  function clearTimer() { if (timer) { clearInterval(timer); timer = null; } }
+
+  audio.onplay = function() {
+    playBtn.textContent = '⏸ 播放中'; startTimer();
+    status.textContent = '🔊 正在朗读全文...';
+  };
+  audio.onpause = function() {
+    playBtn.textContent = '▶ 继续'; clearTimer();
+    status.textContent = '⏸ 已暂停';
+  };
+  audio.onended = function() {
+    playBtn.textContent = '▶ 重播'; clearTimer();
+    progressBar.style.width = '0%';
+    status.textContent = '✅ 播放完成';
+  };
+  audio.onerror = function() {
+    playBtn.textContent = '▶ 朗读本文'; status.textContent = '⚠️ 音频加载失败';
+    clearTimer(); progressBar.style.width = '0%';
+  };
+
+  playBtn.onclick = function() {
+    if (!audio.paused) { audio.pause(); return; }
+    if (audio.ended) audio.currentTime = 0;
+    audio.play().catch(function() { status.textContent = '⚠️ 请先点击页面激活音频'; });
+  };
+  pauseBtn.onclick = function() {
+    if (audio.paused) audio.play().catch(function(){}); else audio.pause();
+  };
+  stopBtn.onclick = function() {
+    audio.pause(); audio.currentTime = 0;
+    playBtn.textContent = '▶ 朗读本文'; status.textContent = '⏹ 已停止';
+    clearTimer(); progressBar.style.width = '0%';
+  };
+  document.addEventListener('keydown', function(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.code === 'Space') {
+      e.preventDefault();
+      if (audio.paused) audio.play().catch(function(){}); else audio.pause();
+    }
+  });
+})();
+</script>
+</body>
+</html>

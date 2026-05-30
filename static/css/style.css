@@ -1,33 +1,33 @@
 /* ============================================================
    Knowledge Hub — Design System
-   Premium dark theme for physics research content
+   Premium light theme for research content
    ============================================================ */
 
 :root {
   /* Core palette */
   --primary: #00D4AA;
-  --primary-dim: rgba(0, 212, 170, 0.12);
-  --primary-glow: rgba(0, 212, 170, 0.25);
+  --primary-dim: rgba(0, 212, 170, 0.08);
+  --primary-glow: rgba(0, 212, 170, 0.15);
   --secondary: #6366F1;
-  --secondary-dim: rgba(99, 102, 241, 0.12);
+  --secondary-dim: rgba(99, 102, 241, 0.08);
   --accent: #F59E0B;
 
   /* Backgrounds */
-  --bg: #080A12;
-  --bg-elevated: #0D0F1A;
-  --card: #111420;
-  --card-hover: #161929;
-  --card-border: rgba(255, 255, 255, 0.06);
+  --bg: #F5F7FA;
+  --bg-elevated: #FFFFFF;
+  --card: #FFFFFF;
+  --card-hover: #F0F4F8;
+  --card-border: rgba(0, 0, 0, 0.06);
   --card-border-hover: rgba(0, 212, 170, 0.2);
 
   /* Text */
-  --text: #ECF1F7;
-  --text-muted: #8892A8;
-  --text-dim: #5A6377;
+  --text: #1A1A2E;
+  --text-muted: #64748B;
+  --text-dim: #94A3B8;
 
   /* Borders */
-  --border: rgba(255, 255, 255, 0.08);
-  --border-light: rgba(255, 255, 255, 0.05);
+  --border: rgba(0, 0, 0, 0.10);
+  --border-light: rgba(0, 0, 0, 0.06);
 
   /* Feedback */
   --success: #10B981;
@@ -81,9 +81,9 @@ body {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 80% 60% at 50% -20%, rgba(0, 212, 170, 0.06) 0%, transparent 70%),
-    radial-gradient(ellipse 60% 50% at 80% 70%, rgba(99, 102, 241, 0.04) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 40% at 20% 80%, rgba(0, 212, 170, 0.03) 0%, transparent 50%);
+    radial-gradient(ellipse 80% 60% at 50% -20%, rgba(0, 212, 170, 0.03) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 80% 70%, rgba(99, 102, 241, 0.02) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 20% 80%, rgba(0, 212, 170, 0.015) 0%, transparent 50%);
 }
 
 /* Selection */
@@ -135,7 +135,7 @@ a:hover {
   right: 0;
   height: var(--nav-height);
   z-index: 1000;
-  background: rgba(8, 10, 18, 0.72);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(24px) saturate(1.4);
   -webkit-backdrop-filter: blur(24px) saturate(1.4);
   border-bottom: 1px solid var(--border-light);
@@ -239,7 +239,7 @@ a:hover {
 .search-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(8, 10, 18, 0.96);
+  background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(20px);
   z-index: 2000;
   display: none;
@@ -311,11 +311,11 @@ a:hover {
 .btn-ghost:hover {
   color: var(--text);
   border-color: var(--text-dim);
-  background: rgba(255,255,255,0.04);
+  background: rgba(0,0,0,0.04);
 }
 .btn-primary {
   background: var(--primary);
-  color: #080A12;
+  color: #FFFFFF;
   font-weight: 600;
 }
 .btn-primary:hover {
@@ -384,7 +384,7 @@ a:hover {
   transform: translateX(-50%);
   width: 700px;
   height: 700px;
-  background: radial-gradient(circle, rgba(0, 212, 170, 0.07) 0%, transparent 65%);
+  background: radial-gradient(circle, rgba(0, 212, 170, 0.04) 0%, transparent 65%);
   pointer-events: none;
 }
 
@@ -583,7 +583,7 @@ a:hover {
   background: var(--card-hover);
   transform: translateY(-3px);
   box-shadow:
-    0 12px 48px rgba(0, 0, 0, 0.4),
+    0 12px 48px rgba(0, 0, 0, 0.1),
     0 0 0 1px rgba(0, 212, 170, 0.06);
 }
 .article-card:hover::before {
@@ -897,7 +897,7 @@ a:hover {
   transform: translate(-50%, -50%);
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, rgba(0, 212, 170, 0.05) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(0, 212, 170, 0.025) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -1280,7 +1280,7 @@ a:hover {
   border-radius: var(--radius-sm);
   color: var(--text);
   font-size: 14px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   animation: slideIn 0.3s var(--ease-out);
   max-width: 360px;
   pointer-events: auto;
