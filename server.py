@@ -20,10 +20,9 @@ CORS(app)
 # Prevent caching of static files so updates reflect immediately
 @app.after_request
 def add_no_cache(response):
-    if response.content_type and 'text/html' in response.content_type:
-        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-    elif response.content_type and ('javascript' in response.content_type or 'css' in response.content_type):
-        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
     return response
 
 # Configuration
@@ -158,6 +157,11 @@ def index():
 @app.route('/ai-news')
 def ai_news():
     return send_from_directory('daily-ai-news', 'index.html')
+
+
+@app.route('/ai-news/<path:filename>')
+def ai_news_pages(filename):
+    return send_from_directory('daily-ai-news', filename)
 
 
 @app.route('/admin/<path:filename>')
