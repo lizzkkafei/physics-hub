@@ -38,7 +38,7 @@ def build_index():
         rc = 'news-rank top3' if r <= 3 else 'news-rank'
         items_html.append(f"""
     <li class="news-item">
-      <a href="detail-{r:02d}.html" class="news-link">
+      <a href="/ai-news/detail-{r:02d}.html" class="news-link">
         <div class="news-head">
           <span class="{rc}">{r}</span>
           <div class="news-title-area">
