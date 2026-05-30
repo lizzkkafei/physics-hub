@@ -155,6 +155,11 @@ def index():
     return send_file('index.html')
 
 
+@app.route('/ai-news')
+def ai_news():
+    return send_file('daily-ai-news.html')
+
+
 @app.route('/admin/<path:filename>')
 def admin_pages(filename):
     return send_from_directory('admin', filename)
