@@ -6,24 +6,46 @@ Flask-based API server for article management
 import os
 import json
 import re
+import requests
 import hashlib
 import secrets
 from datetime import datetime
 from functools import wraps
-from flask import Flask, request, jsonify, send_from_directory, send_file
+from flask import Flask, request, jsonify, send_from_directory, send_file, abort
 from flask_cors import CORS
 import jwt
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 CORS(app)
 
-# Prevent caching of static files so updates reflect immediately
+# Security headers + cache prevention
 @app.after_request
-def add_no_cache(response):
+def add_security_headers(response):
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    response.headers['Server'] = ''  # hide server identity
     return response
+
+@app.route('/robots.txt')
+def robots():
+    from flask import Response
+    content = """User-agent: *
+Disallow: /api/
+Disallow: /admin/
+Allow: /
+Allow: /ai-news/
+Allow: /ai-news/voices/
+Disallow: /ai-news/*.py
+Disallow: /ai-news/*.json
+Disallow: /*.env
+Disallow: /.git/
+"""
+    return Response(content, mimetype='text/plain')
 
 # Configuration
 SECRET_KEY = os.environ.get('KH_SECRET_KEY', 'knowledge-hub-secret-key-change-in-production')
@@ -154,6 +176,19 @@ def index():
     return send_file('index.html')
 
 
+# Allowed file extensions per route — block anything else to prevent source/data leakage
+_ALLOWED_AI_NEWS = {'.html', '.mp3'}
+_ALLOWED_ADMIN = {'.html', '.css', '.js', '.svg', '.png', '.jpg', '.ico', '.woff', '.woff2'}
+
+
+def _safe_send(directory, filename, allowed_exts):
+    """Only serve files with whitelisted extensions. Returns 404 for anything else."""
+    ext = os.path.splitext(filename)[1].lower()
+    if ext not in allowed_exts:
+        abort(404)
+    return send_from_directory(directory, filename)
+
+
 @app.route('/ai-news')
 def ai_news():
     return send_from_directory('daily-ai-news', 'index.html')
@@ -161,12 +196,102 @@ def ai_news():
 
 @app.route('/ai-news/<path:filename>')
 def ai_news_pages(filename):
-    return send_from_directory('daily-ai-news', filename)
+    # Allow voices/ subdirectory for MP3 files, block everything else
+    if filename.startswith('voices/'):
+        ext = os.path.splitext(filename)[1].lower()
+        if ext != '.mp3':
+            abort(404)
+        return send_from_directory('daily-ai-news', filename)
+    return _safe_send('daily-ai-news', filename, _ALLOWED_AI_NEWS)
+
+
+@app.route('/ai-hot')
+def ai_hot():
+    return send_from_directory('ai-hot', 'ai-daily-dashboard.html')
+
+
+@app.route('/ai-hot/<path:filename>')
+def ai_hot_pages(filename):
+    return _safe_send('ai-hot', filename, _ALLOWED_AI_NEWS)
+
+
+@app.route('/ai-paper')
+def ai_paper():
+    return send_from_directory('ai-paper', 'ai-paper.html')
 
 
 @app.route('/admin/<path:filename>')
 def admin_pages(filename):
-    return send_from_directory('admin', filename)
+    return _safe_send('admin', filename, _ALLOWED_ADMIN)
+
+
+FINAGENT_BASE = os.environ.get('FINAGENT_URL', 'http://127.0.0.1:8080')
+
+# ── Helper: generic FinAgent proxy ──────────────────────────────
+def _proxy_finagent(path, method='GET', timeout=60):
+    """Proxy a request to FinAgent and return the Flask response."""
+    import requests as req
+    url = f"{FINAGENT_BASE}/{path.lstrip('/')}"
+    try:
+        if method == 'POST':
+            resp = req.post(url, json=request.get_json(silent=True) or {}, timeout=timeout)
+        else:
+            resp = req.get(url, params=request.args,
+                headers={k: v for k, v in request.headers if k.lower() not in ('host', 'content-length')},
+                timeout=timeout)
+        from flask import Response
+        excluded = {'content-encoding', 'content-length', 'transfer-encoding', 'connection'}
+        resp_headers = [(k, v) for k, v in resp.headers.items() if k.lower() not in excluded]
+        return Response(resp.content, status=resp.status_code, headers=resp_headers)
+    except requests.exceptions.ConnectionError:
+        return None
+
+
+@app.route('/finagent/')
+@app.route('/finagent/<path:subpath>')
+def finagent_proxy(subpath=''):
+    """Proxy requests to the FinAgent static frontend."""
+    resp = _proxy_finagent(subpath, 'GET', 60)
+    if resp is None:
+        return render_proxy_error()
+    return resp
+
+
+# Proxy FinAgent API routes so the frontend JS can reach them at the same host
+@app.route('/api/lookup', methods=['POST'])
+@app.route('/api/analyze', methods=['POST'])
+@app.route('/api/export-pdf', methods=['POST'])
+def finagent_api_proxy():
+    """Proxy FinAgent API calls (lookup / analyze / export-pdf)."""
+    path = request.path  # e.g. /api/lookup
+    timeout = 120 if 'analyze' in path else (60 if 'pdf' in path else 10)
+    resp = _proxy_finagent(path, 'POST', timeout)
+    if resp is None:
+        return jsonify({'ok': False, 'error': 'FinAgent 服务未启动'}), 503
+    return resp
+
+
+def render_proxy_error():
+    """Show a friendly page when FinAgent is not running."""
+    return """<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinAgent — 服务未启动</title>
+<style>
+body{font-family:'Inter','Noto Sans SC',sans-serif;background:#f0f2f5;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
+.card{background:#fff;border-radius:16px;padding:48px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.06);max-width:480px}
+.icon{font-size:48px;margin-bottom:16px}
+h1{font-size:20px;color:#1a1a2e;margin:0 0 8px}
+p{color:#666;font-size:14px;line-height:1.6;margin:0 0 24px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 24px;background:#003366;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none}
+.btn:hover{background:#002244}
+</style></head><body>
+<div class="card"><div class="icon">🔌</div>
+<h1>FinAgent 服务未启动</h1>
+<p>AI 股票分析引擎当前未运行。请先启动 FinAgent 服务，然后再刷新此页面。</p>
+<a class="btn" href="/admin/dashboard.html">← 返回管理后台</a>
+</div></body></html>""", 503
+
+
 
 
 # ============ Public API Routes ============
